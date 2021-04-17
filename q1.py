@@ -1,23 +1,22 @@
 import json
 import numpy as np 
 import sys
-import os 
 
 states=0
-letters=set({})
+
 def isLetterOrDigit(y):
-	if (y<48 or y>57) and (y<97 or y>122):
+	if (y<48 or y>57) and (y<97 or y>122) and (y<65 or y>90):
 		return False
 	return True
 
 def getPrecedence(ch):
-	if ch == '+':
+	if ch in ['+']:
 		return 1
-	if ch == '*':
+	if ch in ['*']:
 		return 2
-	if ch == '.':
+	if ch in ['.']:
 		return 3
-	if ch == '(':
+	if ch in ['(']:
 		return 4
 
 def shuntingyard(x):
@@ -57,16 +56,17 @@ def parseString(x):
 			res.insert(len(res),'.')
 		elif x[i+1]=='(' and isLetterOrDigit(ord(x[i])):
 			res.insert(len(res),'.')
-		elif x[i] in ['*'] and (isLetterOrDigit(ord(x[i+1]) or x[i+1] == '(')):
+		elif x[i] == '*' and (isLetterOrDigit(ord(x[i+1]) or x[i+1] == '(')):
 			res.insert(len(res),'.')
 	if( x[len(x)-1] != res[len(res)-1]):
 		res += x[len(x)-1]
 	return ''.join(res)
 
 def symbolNFA(ch):
-	global states
 	global letters
 	letters.update(set({ch}))
+	global states
+	# print("fffff")
 	nfa["transition_function"].insert(len(nfa["transition_function"]),["Q{}".format(states),ch,"Q{}".format(states+1)])
 	states=states+2
 	return ["Q{}".format(states-2),"Q{}".format(states-1)]
@@ -122,6 +122,8 @@ def regexToNFA(x):
 			stack.insert(len(stack),xt)
 	nfa["start_states"]=xt[0]
 	nfa["final_states"]=xt[1]
+
+letters=set({})
 
 f = open('./regtc.json')
 x=json.load(f)
