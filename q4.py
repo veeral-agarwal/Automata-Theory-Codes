@@ -24,52 +24,50 @@ for x in range(len(dfa["states"])):
             dfa["final_states"].remove(dfa["states"][x])
 
 
-def distinctcheck(x,y):
+def distinctcheck(x):
     global dfa
     global mp1
     global mp2
     global transition_table
-    for xt in range(len(dfa["letters"])):
-        x1=transition_table[mp2[x]][mp1[dfa["letters"][xt]]]
-        x2=transition_table[mp2[y]][mp1[dfa["letters"][xt]]]
-        global previousp1
-        for i in range(len(previousp1)):
-            if x1 in previousp1[i]:
-                x1=i
-        for i in range(len(previousp1)):
-            if x2 in previousp1[i]:
-                x2=i
-        if x1!=x2:
-            return True
-    return False
+    mp={}
+    if x == [] :return True
+    
+
+    for y in range(len(x)):
+        mp[x[y]]=[]
+        for xt in dfa["letters"]:
+            x1=transition_table[mp2[x[y]]][mp1[xt]]
+            global previousp1
+            for i in range(len(previousp1)):
+                if x1 in previousp1[i]:
+                    x1=i
+            indx = len(mp[x[y]])
+            mp[x[y]].insert(indx,x1)
+    
+    for key in mp:
+        if mp[key]!=mp[x[0]]:
+            return False
+    return True
 
 def partition(x):
-    mp={}
-    stateToRemove=[]
+    s1 = []
+    s2 = []
+    l=2**(len(x))
+    lenn = l//2
+    
+    for i in range(lenn):
+        s1.clear()
+        s2.clear()
+        for j in range(len(x)):
+            if i & (2**j):
+                indx = len(s1)
+                s1.insert(indx,x[j])
+            else:
+                indx = len(s2)
+                s2.insert(indx,x[j])
+        if distinctcheck(s1) and distinctcheck(s2):
+            return s1,s2
 
-    for i in range(len(x)):
-        mp[x[i]]=0
-    for i in range(len(x)):
-        for j in range(i+1,len(x),1):
-            
-            if distinctcheck(x[i],x[j]):
-                mp[x[j]]+=1
-                mp[x[i]]+=1
-                
-    stateToRemove.clear()
-    u=0
-    for i in mp:
-        if mp[i]>u:
-            u=mp[i]
-    for i in range(0,len(x)):
-        if mp[x[i]] == u:
-            indx = len(stateToRemove)
-            stateToRemove.insert(indx,x[i])
-    templist = []
-    for xt in x :
-        if xt not in stateToRemove:
-            templist.append(xt)
-    return templist,stateToRemove
 def transstate(x,y):
     global previousp,previousp1,mp1,transition_table
     
