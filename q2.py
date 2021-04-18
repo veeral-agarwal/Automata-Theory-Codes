@@ -1,6 +1,6 @@
 import json
-
-f = open('./NFA.json')
+import sys
+f = open(sys.argv[1],"r")
 nfa=json.load(f)
 
 def getTransitionState(x):
@@ -90,5 +90,5 @@ for x in nfa["final_states"]:
 
 finalstates=[list(x) for x in finalstates]
 dfa["final_states"]=finalstates
-g = open('./outdfa.json','w')
-json.dump(dfa,g)
+g = open(sys.argv[2],'w')
+json.dump(dfa,g,indent=6)

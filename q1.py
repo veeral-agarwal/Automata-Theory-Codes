@@ -4,12 +4,12 @@ import sys
 
 states=0
 
-def isLetterOrDigit(y):
+def checkformat(y):
 	if (y<48 or y>57) and (y<97 or y>122) and (y<65 or y>90):
 		return False
 	return True
 
-def getPrecedence(ch):
+def get_pre(ch):
 	if ch in ['+']:
 		return 1
 	if ch in ['*']:
@@ -19,13 +19,12 @@ def getPrecedence(ch):
 	if ch in ['(']:
 		return 4
 
-def shuntingyard(x):
+def shunt(x):
 	stack=[]
 	outstring=""
 	for i in x:
-		print(outstring)
 		ch=i
-		if isLetterOrDigit(ord(ch)):
+		if checkformat(ord(ch)):
 			outstring=outstring+ch
 		elif ch == '(':
 			stack.insert(len(stack),ch)
@@ -35,7 +34,7 @@ def shuntingyard(x):
 				stack.pop(len(stack)-1)
 			stack.pop(len(stack)-1)
 		else:
-			while len(stack)>0 and getPrecedence(ch)>=getPrecedence(stack[len(stack)-1]):
+			while len(stack)>0 and get_pre(ch)>=get_pre(stack[len(stack)-1]):
 				outstring=outstring+stack[len(stack)-1]
 				stack.pop(len(stack)-1)
 			stack.insert(len(stack),ch)
@@ -44,99 +43,108 @@ def shuntingyard(x):
 		stack.pop(len(stack)-1)
 	return outstring
 
-def parseString(x):
+def pars_str(x):
 	res=[]
 	for i in range(len(x)-1):
 		res.insert(len(res),x[i])
-		if isLetterOrDigit(ord(x[i])) and isLetterOrDigit(ord(x[i+1])):
+		if checkformat(ord(x[i])) and checkformat(ord(x[i+1])):
 			res.insert(len(res),'.')
 		elif x[i]==')' and x[i+1] == '(':
 			res.insert(len(res),'.')
-		elif isLetterOrDigit(ord(x[i+1])) and x[i]==')':
+		elif checkformat(ord(x[i+1])) and x[i]==')':
 			res.insert(len(res),'.')
-		elif x[i+1]=='(' and isLetterOrDigit(ord(x[i])):
+		elif x[i+1]=='(' and checkformat(ord(x[i])):
 			res.insert(len(res),'.')
-		elif x[i] == '*' and (isLetterOrDigit(ord(x[i+1]) or x[i+1] == '(')):
+		elif x[i] == '*' and (checkformat(ord(x[i+1]) or x[i+1] == '(')):
 			res.insert(len(res),'.')
-	if( x[len(x)-1] != res[len(res)-1]):
-		res += x[len(x)-1]
+	check = x[len(x)-1]
+	if( check != res[len(res)-1]):
+		res += check
 	return ''.join(res)
 
-def symbolNFA(ch):
+def NFA_sym(ch):
 	global letters
 	letters.update(set({ch}))
 	global states
-	# print("fffff")
-	nfa["transition_function"].insert(len(nfa["transition_function"]),["Q{}".format(states),ch,"Q{}".format(states+1)])
+	val = ["Q{}".format(states),ch,"Q{}".format(states+1)]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
+	states=states+2
+	ret = list(["Q{}".format(states-2),"Q{}".format(states-1)])
+	return ret
+
+def nfa_unio(nfa1,nfa2):
+	global states
+	val = ["Q{}".format(states),'$',nfa1[0]]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
+	val = ["Q{}".format(states),'$',nfa2[0]]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
+	val = [nfa1[1],'$',"Q{}".format(states+1)]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
+	val = [nfa2[1],'$',"Q{}".format(states+1)]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
 	states=states+2
 	return ["Q{}".format(states-2),"Q{}".format(states-1)]
 
-def unionNFA(nfa1,nfa2):
+def loop(nfa1):
 	global states
-	nfa["transition_function"].insert(len(nfa["transition_function"]),["Q{}".format(states),'$',nfa1[0]])
-	nfa["transition_function"].insert(len(nfa["transition_function"]),["Q{}".format(states),'$',nfa2[0]])
-	nfa["transition_function"].insert(len(nfa["transition_function"]),[nfa1[1],'$',"Q{}".format(states+1)])
-	nfa["transition_function"].insert(len(nfa["transition_function"]),[nfa2[1],'$',"Q{}".format(states+1)])
+	val = [nfa1[1],'$',nfa1[0]]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
+	val = ["Q{}".format(states),'$',nfa1[0]]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
+	val = [nfa1[1],'$',"Q{}".format(states+1)]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
+	val = ["Q{}".format(states),'$',"Q{}".format(states+1)]
+	nfa["transition_function"].insert(len(nfa["transition_function"]),val)
 	states=states+2
 	return ["Q{}".format(states-2),"Q{}".format(states-1)]
 
-def loopNFA(nfa1):
-	print(nfa1)
+def concatenation(nfa1,nfa2):
+	indx=-1
 	global states
-	nfa["transition_function"].insert(len(nfa["transition_function"]),[nfa1[1],'$',nfa1[0]])
-	nfa["transition_function"].insert(len(nfa["transition_function"]),["Q{}".format(states),'$',nfa1[0]])
-	nfa["transition_function"].insert(len(nfa["transition_function"]),[nfa1[1],'$',"Q{}".format(states+1)])
-	nfa["transition_function"].insert(len(nfa["transition_function"]),["Q{}".format(states),'$',"Q{}".format(states+1)])
-	states=states+2
-	return ["Q{}".format(states-2),"Q{}".format(states-1)]
-
-def concatNFA(nfa1,nfa2):
-	global states
-	indx=0
+	
 	for x in range(len(nfa["transition_function"])):
-		# print(nfa1,x)
+		indx+=1
 		if nfa1[1] == nfa["transition_function"][x][2]:
 			nfa["transition_function"][indx][2]=nfa2[0]
-		indx=indx+1
+		
 	return [nfa1[0],nfa2[1]]	
 
-def regexToNFA(x):
+def re2nfa(x):
 	stack=list([])
 	xt=""
 	for i in x:
-		if isLetterOrDigit(ord(i)):
-			stack.insert(len(stack),symbolNFA(i))
+		if checkformat(ord(i)):
+			stack.insert(len(stack),NFA_sym(i))
 		elif i == '+':
-			xt=unionNFA(stack[len(stack)-2],stack[len(stack)-1])
+			xt=nfa_unio(stack[len(stack)-2],stack[len(stack)-1])
 			stack.pop(len(stack)-1)
 			stack.pop(len(stack)-1)
 			stack.insert(len(stack),xt)
 		elif i == "*":
-			xt=loopNFA(stack[len(stack)-1])
+			xt=loop(stack[len(stack)-1])
 			stack.pop(len(stack)-1)
 			stack.insert(len(stack),xt)
 		else:
-			xt=concatNFA(stack[len(stack)-2],stack[len(stack)-1])
+			xt=concatenation(stack[len(stack)-2],stack[len(stack)-1])
 			stack.pop(len(stack)-1)
 			stack.pop(len(stack)-1)
 			stack.insert(len(stack),xt)
-	nfa["start_states"]=xt[0]
-	nfa["final_states"]=xt[1]
+	nfa["start_states"]=[xt[0]]
+	nfa["final_states"]=[xt[1]]
 
 letters=set({})
 
-f = open('./regtc.json')
+f = open(sys.argv[1],"r")
 x=json.load(f)
 nfa={}
 nfa["states"]=[]
 nfa["letters"]=[]
 nfa["transition_function"]=[]
 x=x["regex"]
-x=parseString(x)
-print(x)
-x=shuntingyard(x)
-regexToNFA(x)
-print(nfa["transition_function"])
+x=pars_str(x)
+x=shunt(x)
+re2nfa(x)
+
 s=set({})
 for x in range(len(nfa["transition_function"])):
 	s.update(set({nfa["transition_function"][x][0]}))
@@ -147,6 +155,6 @@ nfa["letters"]=templis
 s=list(s)
 s.sort(key=lambda a:int(a[1:]))
 nfa["states"]=s
-print(nfa)
-g = open('./outna.json','w')
-json.dump(nfa,g)
+
+g = open(sys.argv[2],'w')
+json.dump(nfa,g,indent=6)
