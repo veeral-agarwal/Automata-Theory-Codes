@@ -5,52 +5,12 @@ from sys import argv
 f = open(argv[1])
 dfa=json.load(f)
 
-# flag=False
-# while flag == False:
-#     # print("htrt")
-#     for x in dfa["states"]:
-#         ie=oe=0
-#         for j in dfa["transition_function"]:
-#             if x==j[0] and x == j[2]:
-#                 pass
-#             elif x == j[2]:
-#                 ie+=1
-#             elif x==j[0]:
-#                 oe+=1
-#         if (ie ==0 and oe ==0):
-#             if x in dfa['states']:
-#                 dfa["states"].remove(x)
-#             if x in dfa["final_states"]:
-#                 dfa["final_states"].remove(x)
-#             if x in dfa["start_states"]:
-#                 dfa["start_states"].remove(x)
-#                 # flag=True
-#                 # break
-#         else:
-#             if (oe==0 and x not in dfa["final_states"]) or (ie ==0 and x not in dfa["final_states"] and x not in dfa["start_states"]):
-#                 flag=True
-#                 # print(x)
-#                 toremove=[]
-#                 for y in dfa["transition_function"]:
-#                     if x in y:
-#                         toremove.append(y)
-#                 for i in toremove:
-#                     dfa["transition_function"].remove(i)
-#                 dfa["states"].remove(x)
-#                 if x in dfa["final_states"]:
-#                     dfa["final_states"].remove(x)
-#     if flag==True:
-#         flag=False
-#     else:
-#         flag=True
-
-# print(dfa)
 newletters=set()
 for x in range(len(dfa['transition_function'])):
     newletters.add(dfa['transition_function'][x][1])
 dfa['letters']=list(newletters)
 
-def checkDistinguishable(x):
+def distinctcheck(x):
     if x == []: return True
     global mp1,mp2,transition_table,dfa
     mp={}
@@ -70,7 +30,7 @@ def checkDistinguishable(x):
             return False
     return True
 
-def getpartition(x):
+def doparti(x):
     l=2**(len(x))
     leng = l//2
     for i in range(leng):
@@ -84,12 +44,12 @@ def getpartition(x):
                 indx = len(s2)
                 s2.insert(indx,x[j])
         
-        if checkDistinguishable(s1) :
-            if checkDistinguishable(s2):
+        if distinctcheck(s1) :
+            if distinctcheck(s2):
                 return s1,s2
     
 
-def getTransitState(x,y):
+def trans_state(x,y):
     global mp1,previousp1,previousp,mp2,transition_table
     for i in range(len(previousp1)):
         check = transition_table[mp2[x]][mp1[y]]
@@ -97,7 +57,7 @@ def getTransitState(x,y):
             return previousp[i]
             break
 
-def checkForEqualTransitions(x):
+def transitionscheck(x):
     global mp2,transition_table
     mp={}
     for xt in range(len(x)):
@@ -141,8 +101,8 @@ p0=[]
 startstates=dfa["states"]
 for x in range(len(dfa["final_states"])):
     startstates.remove(dfa["final_states"][x])
-startstates=checkForEqualTransitions(startstates)
-l=checkForEqualTransitions(dfa["final_states"])
+startstates=transitionscheck(startstates)
+l=transitionscheck(dfa["final_states"])
 p0=startstates
 for i in range(len(l)):
     p0.append(l[i])
@@ -161,7 +121,7 @@ while True:
             continue
     
     for x in range(0,len(previousp)):
-        s1,s2=getpartition(previousp[x])
+        s1,s2=doparti(previousp[x])
         # print(s1,s2,"awdwad")
         if s2 == []:
             indx = len(nextstate)
@@ -201,7 +161,7 @@ for i in range(len(dfa['final_states'])):
             fs.insert(indx,previousp[j])
 for i in range(len(previousp)):
     for j in range(len(dfa['letters'])):
-        u=getTransitState(previousp[i][0],dfa['letters'][j])
+        u=trans_state(previousp[i][0],dfa['letters'][j])
         if u:
             newdfa["transition_function"].append([previousp[i],dfa['letters'][j],u])
 
