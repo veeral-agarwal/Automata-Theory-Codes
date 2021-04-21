@@ -46,18 +46,18 @@ dfa=json.load(f)
 
 # print(dfa)
 newletters=set()
-for x in range(len(dfa["transition_function"])):
-    newletters.add(dfa["transition_function"][x][1])
-dfa["letters"]=list(newletters)
+for x in range(len(dfa['transition_function'])):
+    newletters.add(dfa['transition_function'][x][1])
+dfa['letters']=list(newletters)
 
 def checkDistinguishable(x):
     if x == []: return True
     global mp1,mp2,transition_table,dfa
     mp={}
-    for y in range(len(x)):
+    for y in range(0,len(x)):
         mp[x[y]]=[]
-        for xt in range(len(dfa["letters"])):
-            x1=transition_table[mp2[x[y]]][mp1[dfa["letters"][xt]]]
+        for xt in range(len(dfa['letters'])):
+            x1=transition_table[mp2[x[y]]][mp1[dfa['letters'][xt]]]
             for i in range(len(previousp1)):
                 if x1 in previousp1[i]:
                     x1=i
@@ -92,12 +92,13 @@ def getpartition(x):
 def getTransitState(x,y):
     global mp1,previousp1,previousp,mp2,transition_table
     for i in range(len(previousp1)):
-        if transition_table[mp2[x]][mp1[y]] in previousp1[i]:
+        check = transition_table[mp2[x]][mp1[y]]
+        if check in previousp1[i]:
             return previousp[i]
+            break
 
 def checkForEqualTransitions(x):
-    global transition_table
-    global mp2
+    global mp2,transition_table
     mp={}
     for xt in range(len(x)):
         tt=[]
@@ -129,11 +130,11 @@ for i in range(len(dfa["letters"])):
     start+=1
 start=0
 mp2={}
-for i in range(len(dfa["states"])):
-    mp2[dfa["states"][i]]=start
+for i in range(0,len(dfa['states'])):
+    mp2[dfa['states'][i]]=start
     start+=1
-for x in range(len(dfa["transition_function"])):
-    transition_table[mp2[dfa["transition_function"][x][0]]][mp1[dfa["transition_function"][x][1]]]=mp2[dfa["transition_function"][x][2]]
+for x in range(len(dfa['transition_function'])):
+    transition_table[mp2[dfa['transition_function'][x][0]]][mp1[dfa['transition_function'][x][1]]]=mp2[dfa['transition_function'][x][2]]
 
 previousp=[]
 p0=[]

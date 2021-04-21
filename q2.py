@@ -70,8 +70,8 @@ for x in states:
     for key in (l):
         temp = len(dfa["transition_function"]) 
         l[key].sort(key=lambda x:int(x[1:len(x)]))
-        tempval = [x,key,l[key]]
-        dfa["transition_function"].insert(temp,tempval)
+        # tempval = 
+        dfa["transition_function"].insert(temp,[x,key,l[key]])
     for key in nfa["letters"]:
         if key not in l:
             temp = len(dfa["transition_function"])
