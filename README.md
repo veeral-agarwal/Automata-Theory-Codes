@@ -1,4 +1,5 @@
 # Programming Assignment
+Automata Theory | spring 2021
 
 ## Regex to NFA
 
