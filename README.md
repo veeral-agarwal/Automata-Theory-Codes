@@ -1,5 +1,5 @@
 # Programming Assignment
-Automata Theory | spring 2021
+Assignment done as a part of course Automata Theory | monsoon 2021
 
 ## Regex to NFA
 
